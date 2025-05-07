@@ -139,3 +139,14 @@ h1, h2, h3 {
 /* .suggestion-very-strong-low { color: darkred; } */
 /* .suggestion-very-strong-high { color: darkgreen; } */
 /* etc. */
+
+/* Style for numbers adjacent to 0/00 when they appear in the surrounding zones */
+.zero-adjacent {
+    color: orange; /* Change text color to orange */
+    font-weight: bold; /* Make it bold */
+    text-decoration: underline; /* Underline it for extra visibility */
+    /* You could also add a background color */
+    /* background-color: #ffe0b2; */
+    /* padding: 2px 4px; */
+    /* border-radius: 3px; */
+}

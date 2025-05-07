@@ -155,14 +155,15 @@ function classifyE4(avg10) {
 }
 
 
-// --- Helper Function: Get Suggestion (Equivalent to H1 logic) ---
+// --- Helper Function: Get Suggestion (V2 - Quadrant/Half/Zone Framing & Intricate Web) ---
 // This function takes the classified states of E3 (sum of 4) and E4 (avg of 10)
 // and outputs a detailed suggestion string based on their combination.
 function getSuggestion(e3Class, e4Class) {
     // Need classifications from both E3 (sum of 4) and E4 (avg of 10) for a suggestion
-     // This check remains the same - needs *classified states* which require enough data
+     // **REMOVED specific "Needs data" message**
      if (e3Class === "" || e4Class === "") {
-         return "Analyzing Pattern... Need 4+ Quads & 10+ numbers..."; // Message if not enough data for classification
+         // Display this message if there isn't enough history yet for classification
+         return "Analyzing Pattern... Need 4+ Quads & 10+ Numbers..."; // Or "" if preferred
      }
 
 
@@ -189,9 +190,13 @@ function getSuggestion(e3Class, e4Class) {
 
     // Case 4: Strong Above Balance
     // Indicators are significantly above balance, but not extreme. Focus on higher halves/quadrants.
-    if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_High" || e4Class === "E4_MidHigh")) {
-         return "Strong Suggest: High Halves (19-36). Strong Likeliness for Q3/Q4 activity. Consider betting on Dozen 3 or upper half of Dozen 2.";
+    if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_High" || e4Class === "E4_High")) {
+        return "Strong Suggest: High Halves (19-36). Strong Likeliness for Q3/Q4 activity. Consider betting on Dozen 3 or upper half of Dozen 2.";
     }
+     if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_MidHigh")) { // Added MidHigh check
+        return "Strong Suggest: High Halves (19-36). Strong Likeliness for Q3/Q4 activity. Consider betting on Dozen 3 or upper half of Dozen 2.";
+    }
+
 
     // Case 5: Very Near Balance (The Peak of the 4x4x4x4 Sum Distribution)
     // Indicators are close to the overall balance points. Focus on the middle zones.
@@ -210,7 +215,7 @@ function getSuggestion(e3Class, e4Class) {
     if ((e3Class === "E3_Medium" || e3Class === "E3_MidHigh") && (e4Class === "E4_High" || e4Class === "E4_High")) {
         return "Leaning Suggest: High Halves (19-36). Likeliness leans towards Q3/Q4 activity. Consider betting Dozen 3.";
     }
-    if ((e3Class === "E3_Medium" || e3Class === "E3_MidHigh") && (e4Class === "E4_MidHigh")) { // Added MidHigh check
+     if ((e3Class === "E3_Medium" || e3Class === "E3_MidHigh") && (e4Class === "E4_MidHigh")) { // Added MidHigh check
         return "Leaning Suggest: High Halves (19-36). Likeliness leans towards Q3/Q4 activity. Consider betting Dozen 3.";
     }
 
@@ -473,7 +478,7 @@ function updateAnalysisDisplay() {
 
 
      // Clear input field after adding to history
-     spinInput.value = ""; // Clear input for next entry
+     spinInput.value = ""; // Uncomment this line if you want input field to clear after adding
      // Keep focus on input for rapid entry (optional)
      // spinInput.focus(); // This might cause issues on some mobile keyboards
 
