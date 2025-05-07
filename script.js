@@ -71,35 +71,39 @@ function getHalf(number) {
 
 
 // --- Helper Function: Calculate Sum of Last 4 Quadrants (Equivalent to E3 logic) ---
+// **MODIFIED to include 0/00 in history count but not sum**
 function calculateSumLast4Quads(historyArray) {
-    const last4Spins = historyArray.slice(-4); // Get the last up to 4 entries
-    if (last4Spins.length < 4) return null; // Only calculate if there are at least 4 spins
+    // Requires at least 4 total spins in history
+    if (historyArray.length < 4) return null;
+
+    const last4Spins = historyArray.slice(-4); // Get the last 4 entries
 
     let sum = 0;
-    let count = 0; // Count how many had a valid quadrant (1-4)
+    // Removed count check inside loop - just sum valid quads
 
     for (const spin of last4Spins) {
         const quad = getQuadrant(spin);
         // Only sum quadrants 1-4, ignore 0, 00, or null
         if (typeof quad === 'number' && quad >= 1 && quad <= 4) {
             sum += quad;
-            count++;
-        } else {
-            // If any of the last 4 do not have a valid quadrant (1-4), we cannot form a sum of 4 quads
-            return null; // Cannot calculate sum of 4 quads
         }
+        // Do NOT return null here if quad is 0, "00", or null - calculation proceeds
     }
-     // We should only get here if all 4 spins had valid quads (1-4)
+    // Returns 0 if >= 4 spins but no valid quads in the last 4 (e.g., four 0s in a row)
+    // Returns sum if >= 4 spins and valid quads were found in the last 4
     return sum;
 }
 
 // --- Helper Function: Calculate Avg of Last 10 Raw (Equivalent to E4 logic) ---
+// **MODIFIED to include 0/00 in history count but not avg sum/count**
 function calculateAvgLast10Raw(historyArray) {
-    const last10Spins = historyArray.slice(-10); // Get the last up to 10 entries
-     if (last10Spins.length < 10) return null; // Only calculate if there are at least 10 spins
+    // Requires at least 10 total spins in history
+    if (historyArray.length < 10) return null;
+
+    const last10Spins = historyArray.slice(-10); // Get the last 10 entries
 
     let sum = 0;
-    let count = 0;
+    let count = 0; // Count valid 1-36 numbers for average
 
     for (const spin of last10Spins) {
          // Only include numbers 1-36 in the raw average
@@ -108,14 +112,12 @@ function calculateAvgLast10Raw(historyArray) {
         if (!isNaN(numberValue) && typeof spin !== 'string' && spin >= 1 && spin <= 36) { // Check if it's a valid number 1-36
              sum += numberValue;
             count++;
-        } else {
-             // If any of the last 10 are not valid numbers (1-36), we cannot form an avg of 10 raw numbers
-             return null; // Cannot calculate avg of 10 raw
         }
+         // Do NOT return null here if spin is 0, "00", or invalid type - calculation proceeds
     }
 
-     // We should only get here if all 10 spins had valid numbers (1-36)
-    return count === 10 ? sum / count : null; // Ensure exactly 10 valid numbers were summed
+    // Returns average if count > 0, otherwise return null (if 10 spins but no valid 1-36 numbers in last 10)
+    return count > 0 ? sum / count : null;
 }
 
 
@@ -153,15 +155,14 @@ function classifyE4(avg10) {
 }
 
 
-// --- Helper Function: Get Suggestion (V2 - Quadrant/Half/Zone Framing & Intricate Web) ---
-// This function takes the classified states of E3 (Sum of 4 Quads) and E4 (Avg of 10 Raw)
+// --- Helper Function: Get Suggestion (Equivalent to H1 logic) ---
+// This function takes the classified states of E3 (sum of 4) and E4 (avg of 10)
 // and outputs a detailed suggestion string based on their combination.
 function getSuggestion(e3Class, e4Class) {
     // Need classifications from both E3 (sum of 4) and E4 (avg of 10) for a suggestion
-     // **REMOVED specific "Needs data" message**
+     // This check remains the same - needs *classified states* which require enough data
      if (e3Class === "" || e4Class === "") {
-         // Display this message if there isn't enough history yet for classification
-         return "Analyzing Pattern... Need 4+ Quads & 10+ Numbers..."; // Or "" if preferred
+         return "Analyzing Pattern... Need 4+ Quads & 10+ numbers..."; // Message if not enough data for classification
      }
 
 
@@ -248,8 +249,19 @@ function getSuggestion(e3Class, e4Class) {
     return "Pattern Breakdown: Indicators Muddled. Zero Edge Signal ACTIVE. Consider betting 0/00 or adjacent numbers.";
 
     // Optional: Add the Zero Edge Signal Trigger - This logic needs to go *before* returning the default suggestion
-    // We can add a dedicated output for this Zero Signal Status separately in the display,
-    // controlled by checking if the getSuggestion function returns a string containing "Zero Edge Signal ACTIVE".
+    /*
+    if (
+        e3Class === "E3_ExtremeLow" ||
+        e3Class === "E3_ExtremeHigh" ||
+        e3Class.includes("Conflicting") // Check if the output string contains "Conflicting"
+       ) {
+           // You might want a separate output area for the Zero signal,
+           // or combine the messages, or have a dedicated "Zero Signal Active" message in H1
+           // For now, the default case covers the muddled state.
+           // E.g., Add a line like: suggestionOutput.style.color = 'green'; // Change color for zero signal states
+           // return "ZERO EDGE SIGNAL Active!"; // Or just return a specific zero message
+       }
+     */
 }
 
 
