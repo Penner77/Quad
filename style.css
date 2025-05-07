@@ -1,5 +1,3 @@
-/* Add this code to your style.css file */
-
 /* Basic body/page styling */
 body {
     font-family: sans-serif;
@@ -44,7 +42,6 @@ h1, h2, h3 {
 
 .input-section button {
     padding: 8px 12px;
-    /* margin-left: 10px; */ /* Removed margin-left as gap handles spacing */
     border: 1px solid #007bff; /* Blue border */
     border-radius: 4px;
     background-color: #007bff; /* Blue background */

@@ -4,13 +4,14 @@
 // Use numbers for 1-36 and 0. Use string "00" if that's how you enter it.
 const wheelData = [
     // !!! REPLACE THIS ARRAY WITH YOUR ACTUAL WHEEL ORDER !!!
+    // Example Standard Double Zero Order:
     0, 28, 9, 26, 30, 11, 7, 20, 32, 17, 5, 22, 34, 15, 3, 24, 36, 13, 1,
-    "00", // Example: Representing Double Zero as a string
+    "00", // Example: Representing Double Zero as a string. If your wheel doesn't have 00, remove this line.
     27, 10, 25, 29, 12, 8, 19, 31, 18, 6, 21, 33, 16, 4, 23, 35, 14, 2
     // !!! END OF ARRAY TO REPLACE !!!
 ];
 
-const wheelSize = wheelData.length; // Should be 38 for double zero
+const wheelSize = wheelData.length; // Should be 38 for double zero. If no 00, change to 37.
 
 // --- History Storage ---
 let spinHistory = []; // This array will store all entered spin results
@@ -28,8 +29,8 @@ const avg10Output = document.getElementById('avg10Output');
 const suggestionOutput = document.getElementById('suggestionOutput');
 const surroundingNumbersOutput = document.getElementById('surroundingNumbersOutput');
 const last10SpinsList = document.getElementById('last10SpinsList');
-const last10QuadrantsList = document.getElementById('last10QuadrantsList'); // **NEW Reference**
-const last10HalvesList = document.getElementById('last10HalvesList'); // **NEW Reference**
+const last10QuadrantsList = document.getElementById('last10QuadrantsList');
+const last10HalvesList = document.getElementById('last10HalvesList');
 
 
 // --- Helper Function: Get Quadrant (Equivalent to Column B logic) ---
@@ -152,54 +153,103 @@ function classifyE4(avg10) {
 }
 
 
-// --- Helper Function: Get Suggestion (Equivalent to H1 logic) ---
+// --- Helper Function: Get Suggestion (V2 - Quadrant/Half/Zone Framing & Intricate Web) ---
+// This function takes the classified states of E3 (Sum of 4 Quads) and E4 (Avg of 10 Raw)
+// and outputs a detailed suggestion string based on their combination.
 function getSuggestion(e3Class, e4Class) {
     // Need classifications from both E3 (sum of 4) and E4 (avg of 10) for a suggestion
      // **REMOVED specific "Needs data" message**
      if (e3Class === "" || e4Class === "") {
-         return ""; // Return blank if not enough data for classification
+         // Display this message if there isn't enough history yet for classification
+         return "Analyzing Pattern... Need 4+ Quads & 10+ Numbers..."; // Or "" if preferred
      }
 
 
-    // Use the H1 IFS logic based on classification strings
-    if (e3Class === "E3_ExtremeLow" && e4Class === "E4_ExtremeLow") return "VERY Strong Suggest: Bet Dozen 3 (Extreme Low Indicators)";
-    if (e3Class === "E3_ExtremeHigh" && e4Class === "E4_ExtremeHigh") return "VERY Strong Suggest: Bet Dozen 1 (Extreme High Indicators)";
+    // --- Intricate Web: Mapping Classified States to Bet Possibilities ---
+    // Order is important - more specific/extreme combinations first
 
-    if ((e3Class === "E3_Low" || e3Class === "E3_MidLow") && (e4Class === "E4_Low" || e4Class === "E4_MidLow")) return "Strong Suggest: Bet Dozen 3 or 2 (Far Below Balance)";
-    if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_High" || e4Class === "E4_MidHigh")) return "Strong Suggest: Bet Dozen 1 or 2 (Far Above Balance)";
+    // Case 1: Extreme Low E3 & Extreme Low E4
+    // Indicators are far below balance. Focus on the lowest numbers/zones.
+    if (e3Class === "E3_ExtremeLow" && e4Class === "E4_ExtremeLow") {
+        return "VERY Strong Suggest: Focus Low Quadrants (1 & 2), 1-18 Half. High Likeliness for numbers in Q1/Q2, especially near center of 1-18. Consider Corners/Splits in Q1/Q2 boundaries.";
+    }
 
-    if (e3Class === "E3_Medium" && e4Class === "E4_Medium") return "Suggest: Bet Dozen 2 (Very Near Balance)";
+    // Case 2: Extreme High E3 & Extreme High E4
+    // Indicators are far above balance. Focus on the highest numbers/zones.
+    if (e3Class === "E3_ExtremeHigh" && e4Class === "E4_ExtremeHigh") {
+        return "VERY Strong Suggest: Focus High Quadrants (3 & 4), 19-36 Half. High Likeliness for numbers in Q3/Q4, especially near center of 19-36. Consider Corners/Splits in Q3/Q4 boundaries.";
+    }
 
-    if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_MidLow" || e4Class === "E4_Medium")) return "Leaning Suggest: Bet Dozen 2 or 1 (E1 High/Avg, E2 Near Avg)";
-    if ((e3Class === "E3_Medium" || e3Class === "E3_MidHigh") && (e4Class === "E4_High" || e4Class === "E4_High")) return "Leaning Suggest: Bet Dozen 2 or 3 (E1 Near/High, E2 High/Avg)"; // G1 High check
-    if ((e3Class === "E3_Medium" || e3Class === "E3_MidHigh") && (e4Class === "E4_MidHigh")) return "Leaning Suggest: Bet Dozen 2 or 3 (E1 Near/High, E2 High/Avg)"; // Added MidHigh check
+    // Case 3: Strong Below Balance
+    // Indicators are significantly below balance, but not extreme. Focus on lower halves/quadrants.
+    if ((e3Class === "E3_Low" || e3Class === "E3_MidLow") && (e4Class === "E4_Low" || e4Class === "E4_MidLow")) {
+        return "Strong Suggest: Low Halves (1-18). Strong Likeliness for Q1/Q2 activity. Consider betting on Dozen 1 or lower half of Dozen 2.";
+    }
 
-    if ((e3Class === "E3_Low" || e3Class === "E3_MidLow") && (e4Class === "E4_MidLow" || e4Class === "E4_Medium")) return "Leaning Suggest: Bet Dozen 2 or 3 (E1 Low/Avg, E2 Near Avg)";
-    if ((e3Class === "E3_Medium" || e3Class === "E3_MidHigh") && (e4Class === "E4_Low" || e4Class === "E4_MidLow")) return "Leaning Suggest: Bet Dozen 2 or 1 (E1 Near/High, E2 Low/Avg)";
+    // Case 4: Strong Above Balance
+    // Indicators are significantly above balance, but not extreme. Focus on higher halves/quadrants.
+    if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_High" || e4Class === "E4_MidHigh")) {
+         return "Strong Suggest: High Halves (19-36). Strong Likeliness for Q3/Q4 activity. Consider betting on Dozen 3 or upper half of Dozen 2.";
+    }
 
-    if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_Low" || e4Class === "E4_MidLow")) return "Conflicting High E / Low E - Unclear";
-    if ((e3Class === "E3_Low" || e3Class === "E3_MidLow") && (e4Class === "E4_High" || e4Class === "E4_High")) return "Conflicting Low E / High E - Unclear"; // G1 High check
-     if ((e3Class === "E3_Low" || e3Class === "E3_MidLow") && (e4Class === "E4_MidHigh")) return "Conflicting Low E / High E - Unclear"; // Added MidHigh check
+    // Case 5: Very Near Balance (The Peak of the 4x4x4x4 Sum Distribution)
+    // Indicators are close to the overall balance points. Focus on the middle zones.
+    if (e3Class === "E3_Medium" && e4Class === "E4_Medium") {
+        return "Suggest: Near Balance. Highest Likeliness for activity in middle zones (Dozen 2/Mid Quadrants 2 & 3). Consider Splits/Corners around 17-20.";
+    }
+
+    // Case 6: Leaning High (E3 High/Avg, E4 Near/Avg)
+    // Sum of Quads is high, Avg is more central. Leaning high bias.
+    if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_MidLow" || e4Class === "E4_Medium")) {
+        return "Leaning Suggest: High Quadrants (3 & 4). Likeliness leans towards 19-36 Half. Consider betting Q3/Q4 or their boundary zones.";
+    }
+
+    // Case 7: Leaning High (E3 Near/Avg, E4 High)
+    // Sum of Quads is central, Avg is high. Stronger overall high bias.
+    if ((e3Class === "E3_Medium" || e3Class === "E3_MidHigh") && (e4Class === "E4_High" || e4Class === "E4_High")) {
+        return "Leaning Suggest: High Halves (19-36). Likeliness leans towards Q3/Q4 activity. Consider betting Dozen 3.";
+    }
+    if ((e3Class === "E3_Medium" || e3Class === "E3_MidHigh") && (e4Class === "E4_MidHigh")) { // Added MidHigh check
+        return "Leaning Suggest: High Halves (19-36). Likeliness leans towards Q3/Q4 activity. Consider betting Dozen 3.";
+    }
 
 
-    // This is the default "Signal Unclear / Other Combination" case if none of the above match
-    // Let's use the revised text reflecting pattern breakdown
-    return "Pattern Breakdown: Indicators Muddled - Opposition Possible";
+    // Case 8: Leaning Low (E3 Low/Avg, E4 Near/Avg)
+    // Sum of Quads is low, Avg is more central. Leaning low bias.
+    if ((e3Class === "E3_Low" || e3Class === "E3_MidLow") && (e4Class === "E4_MidLow" || e4Class === "E4_Medium")) {
+        return "Leaning Suggest: Low Quadrants (1 & 2). Likeliness leans towards 1-18 Half. Consider betting Q1/Q2 or their boundary zones.";
+    }
+
+    // Case 9: Leaning Low (E3 Near/Avg, E4 Low)
+    // Sum of Quads is central, Avg is low. Stronger overall low bias.
+    if ((e3Class === "E3_Medium" || e3Class === "E3_MidHigh") && (e4Class === "E4_Low" || e4Class === "E4_MidLow")) {
+        return "Leaning Suggest: Low Halves (1-18). Likeliness leans towards Q1/Q2 activity. Consider betting Dozen 1.";
+    }
+
+    // Case 10: Conflict (High E3 vs Low E4)
+    // Quadrant concentration high, but overall numbers low. Strong internal conflict.
+    if ((e3Class === "E3_High" || e3Class === "E3_MidHigh") && (e4Class === "E4_Low" || e4Class === "E4_MidLow")) {
+         return "Conflict: High Quads vs Low Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads.";
+    }
+
+    // Case 11: Conflict (Low E3 vs High E4)
+    // Quadrant concentration low, but overall numbers high. Strong internal conflict.
+    if ((e3Class === "E3_Low" || e3Class === "E3_MidLow") && (e4Class === "E4_High" || e4Class === "E4_High")) {
+         return "Conflict: Low Quads vs High Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads.";
+    }
+     if ((e3Class === "E3_Low" || e3Class === "E3_MidLow") && (e4Class === "E4_MidHigh")) { // Added MidHigh check
+         return "Conflict: Low Quads vs High Avg. Indicators oppose. Focus boundary zones: Q2/Q3 border (18/19), Q1/Q4 border (9/28). Consider Splits bridging halves/quads.";
+    }
+
+
+    // Case 12: Pattern Breakdown / Zero Edge Signal (Default if none above match)
+    // This covers remaining combinations and implies a state where the indicators don't fit
+    // defined patterns. This is where the base 4 '2' signal might be strongest.
+    return "Pattern Breakdown: Indicators Muddled. Zero Edge Signal ACTIVE. Consider betting 0/00 or adjacent numbers.";
 
     // Optional: Add the Zero Edge Signal Trigger - This logic needs to go *before* returning the default suggestion
-    /*
-    if (
-        e3Class === "E3_ExtremeLow" ||
-        e3Class === "E3_ExtremeHigh" ||
-        e3Class.includes("Conflicting") // Check if the output string contains "Conflicting"
-       ) {
-           // You might want a separate output area for the Zero signal,
-           // or combine the messages, or have a dedicated "Zero Signal Active" message in H1
-           // For now, the default case covers the muddled state.
-           // E.g., Add a line like: suggestionOutput.style.color = 'green'; // Change color for zero signal states
-           // return "ZERO EDGE SIGNAL Active!"; // Or just return a specific zero message
-       }
-     */
+    // We can add a dedicated output for this Zero Signal Status separately in the display,
+    // controlled by checking if the getSuggestion function returns a string containing "Zero Edge Signal ACTIVE".
 }
 
 
@@ -244,14 +294,14 @@ function getSurroundingNumbersString(spinResult) {
 
         // Around Self (5 before, self, 5 after)
         for (let i = -5; i <= 5; i++) {
-            const position = (spinMatchIndex + i + wheelSize) % wheelSize; // Handles wrapping
+            const position = (spinMatchIndex + i + wheelData.length) % wheelData.length; // Handles wrapping, use wheelData.length
             surroundingNumbers.push(wheelData[position]);
         }
 
         let oppositeNumbers = [];
          // Around Opposite (5 before, opposite, 5 after)
          for (let i = -5; i <= 5; i++) {
-            const position = (oppositeMatchIndex + i + wheelSize) % wheelSize; // Handles wrapping
+            const position = (oppositeMatchIndex + i + wheelData.length) % wheelData.length; // Handles wrapping, use wheelData.length
             oppositeNumbers.push(wheelData[position]);
         }
 
@@ -320,18 +370,9 @@ function updateAnalysisDisplay() {
     validationFeedback.textContent = "";
 
     // 3. Add the validated input to the history array
-    // Only add if it's different from the last entry to avoid duplicates on rapid clicks
-     const lastHistoryEntry = spinHistory.length > 0 ? spinHistory[spinHistory.length - 1] : null;
-     const isInputSameAsLastValid = lastHistoryEntry !== null && parsedSpin === lastHistoryEntry;
-
-     // Add to history if it's the first entry OR different from the last entry
-     if (spinHistory.length === 0 || !isInputSameAsLastValid) {
-          spinHistory.push(parsedSpin);
-          // Optional: Limit history size? spinHistory = spinHistory.slice(-100); // Keep last 100
-     } else {
-         // Optional: Message if input is same as last
-         // validationFeedback.textContent = "Same as last spin, not added.";
-     }
+    // **Corrected Logic: Always push valid input**
+    spinHistory.push(parsedSpin);
+    // Optional: Limit history size? spinHistory = spinHistory.slice(-100); // Keep last 100
 
 
     // --- Perform Calculations based on History ---
@@ -421,8 +462,9 @@ function updateAnalysisDisplay() {
 
      // Clear input field after adding to history
      spinInput.value = ""; // Clear input for next entry
-     // Keep focus on input for rapid entry
-     spinInput.focus();
+     // Keep focus on input for rapid entry (optional)
+     // spinInput.focus(); // This might cause issues on some mobile keyboards
+
 }
 
 
@@ -464,7 +506,7 @@ clearHistoryButton.addEventListener('click', () => {
     last10QuadrantsList.textContent = "";
     last10HalvesList.textContent = "";
     validationFeedback.textContent = "";
-     spinInput.focus(); // Return focus
+     // spinInput.focus(); // Return focus - This might cause issues on some mobile keyboards
 });
 
 
